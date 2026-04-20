@@ -1,8 +1,22 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import axios from "axios";
 
 const SCALE = 0.0001;
 const R = 1;
+const API_URL = "https://focus-api-vg34.onrender.com";
+const API_KEY = "focus-dev-key-2026";
+const H = { "X-API-Key": API_KEY };
+
+function latLonToXYZ(lat, lon, r) {
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lon + 180) * Math.PI / 180;
+  return [
+    -r * Math.sin(phi) * Math.cos(theta),
+    r * Math.cos(phi),
+    r * Math.sin(phi) * Math.sin(theta)
+  ];
+}
 
 export default function OrbitalView({ satellites, tleData = {} }) {
   const mountRef = useRef(null);
@@ -11,9 +25,9 @@ export default function OrbitalView({ satellites, tleData = {} }) {
     const el = mountRef.current;
     if (!el) return;
     const W = el.clientWidth;
-    const H = el.clientHeight;
+    const H2 = el.clientHeight;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(W, H);
+    renderer.setSize(W, H2);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
     el.appendChild(renderer.domElement);
@@ -22,23 +36,22 @@ export default function OrbitalView({ satellites, tleData = {} }) {
       width: "100%", height: "100%", cursor: "grab", zIndex: "1"
     });
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.01, 100);
+    const camera = new THREE.PerspectiveCamera(45, W / H2, 0.01, 100);
     camera.position.set(0, 1.2, 3.2);
     camera.lookAt(0, 0, 0);
     const group = new THREE.Group();
     scene.add(group);
 
-    // Texture NASA
+    // Terre
     const loader = new THREE.TextureLoader();
     const earthMat = new THREE.MeshPhongMaterial({ color: 0x0a1628, emissive: 0x051020, specular: 0x1a3a5c, shininess: 40 });
-    loader.load(
-      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+    loader.load("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
       (tex) => { earthMat.map = tex; earthMat.needsUpdate = true; }
     );
     group.add(new THREE.Mesh(new THREE.SphereGeometry(R, 64, 64), earthMat));
 
     // Grille
-    const gMat = new THREE.LineBasicMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.25 });
+    const gMat = new THREE.LineBasicMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.2 });
     for (let lat = -80; lat <= 80; lat += 20) {
       const pts = [];
       for (let lon = 0; lon <= 361; lon += 5) {
@@ -58,19 +71,16 @@ export default function OrbitalView({ satellites, tleData = {} }) {
       group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gMat));
     }
 
-    // Atmosphere
     group.add(new THREE.Mesh(
       new THREE.SphereGeometry(R * 1.04, 32, 32),
       new THREE.MeshPhongMaterial({ color: 0x1a4a8a, transparent: true, opacity: 0.06, side: THREE.BackSide })
     ));
 
-    // Lights
     scene.add(new THREE.AmbientLight(0x223355, 2));
     const sun = new THREE.DirectionalLight(0x4488cc, 2.5);
     sun.position.set(5, 3, 5);
     scene.add(sun);
 
-    // Stars
     const sp = [];
     for (let i = 0; i < 1500; i++) {
       const r = 20 + Math.random() * 20;
@@ -82,23 +92,25 @@ export default function OrbitalView({ satellites, tleData = {} }) {
     sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
     scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0x88aacc, size: 0.04, transparent: true, opacity: 0.5 })));
 
-    // Satellites — dans le group pour suivre la rotation
     const COLORS = [0x3b82f6, 0x34d399, 0xa78bfa, 0xf87171, 0xfbbf24];
     const satObjs = [];
     const toRender = satellites.length > 0 ? satellites : [{ altitude_km: 420, inclination_deg: 51.6 }];
+
     toRender.forEach((sat, i) => {
       const tle = tleData[sat.norad_id];
       const alt = ((tle ? tle.altitude_km : null) || sat.altitude_km || 420) * SCALE + R;
       const inc = ((tle ? tle.inclination_deg : null) || sat.inclination_deg || 51.6) * Math.PI / 180;
       const col = COLORS[i % COLORS.length];
+
       const ops = [];
       for (let a = 0; a <= Math.PI * 2 + 0.01; a += 0.02) {
         ops.push(new THREE.Vector3(alt*Math.cos(a), alt*Math.sin(a)*Math.sin(inc), alt*Math.sin(a)*Math.cos(inc)));
       }
       group.add(new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(ops),
-        new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: satellites.length > 0 ? 0.35 : 0.12 })
+        new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.25 })
       ));
+
       if (satellites.length > 0) {
         const mesh = new THREE.Mesh(
           new THREE.SphereGeometry(0.028, 12, 12),
@@ -106,6 +118,22 @@ export default function OrbitalView({ satellites, tleData = {} }) {
         );
         group.add(mesh);
         satObjs.push({ mesh, alt, inc, phase: (i / toRender.length) * Math.PI * 2 });
+
+        // Trajectoire prédite depuis /v1/predict
+        axios.get(API_URL + "/v1/predict/" + sat.norad_id + "?hours=6", { headers: H })
+          .then(res => {
+            const pts = res.data.risk_timeline.map(p => {
+              const xyz = latLonToXYZ(p.latitude_deg, p.longitude_deg, alt);
+              return new THREE.Vector3(...xyz);
+            });
+            if (pts.length > 1) {
+              const trackLine = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(pts),
+                new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.7, linewidth: 2 })
+              );
+              group.add(trackLine);
+            }
+          }).catch(() => {});
       }
     });
 
