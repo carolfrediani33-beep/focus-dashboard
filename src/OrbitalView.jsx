@@ -4,7 +4,7 @@ import * as THREE from "three";
 const SCALE = 0.0001;
 const R = 1;
 
-export default function OrbitalView({ satellites }) {
+export default function OrbitalView({ satellites, tleData = {} }) {
   const mountRef = useRef(null);
 
   useEffect(() => {
@@ -104,8 +104,9 @@ export default function OrbitalView({ satellites }) {
     const toRender = satellites.length > 0 ? satellites : [{ altitude_km: 420, inclination_deg: 51.6 }];
 
     toRender.forEach((sat, i) => {
-      const alt = (sat.altitude_km || 420) * SCALE + R;
-      const inc = (sat.inclination_deg || 51.6) * Math.PI / 180;
+      const tle = tleData[sat.norad_id];
+      const alt = ((tle?.altitude_km || sat.altitude_km || 420)) * SCALE + R;
+      const inc = ((tle?.inclination_deg || sat.inclination_deg || 51.6)) * Math.PI / 180;
       const col = COLORS[i % COLORS.length];
 
       const ops = [];
