@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import OrbitalView from "./OrbitalView";
 
 const API_URL = "https://focus-api-vg34.onrender.com";
 const API_KEY = "focus-dev-key-2026";
