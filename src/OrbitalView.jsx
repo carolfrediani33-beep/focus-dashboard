@@ -45,7 +45,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
     // Terre
     const loader = new THREE.TextureLoader();
     const earthMat = new THREE.MeshPhongMaterial({ color: 0x0a1628, emissive: 0x051020, specular: 0x1a3a5c, shininess: 40 });
-    loader.load("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg",
+    loader.load("/earth.jpg",
       (tex) => { earthMat.map = tex; earthMat.needsUpdate = true; }
     );
     group.add(new THREE.Mesh(new THREE.SphereGeometry(R, 64, 64), earthMat));
