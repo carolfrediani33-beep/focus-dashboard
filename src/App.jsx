@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import OrbitalView from "./OrbitalView";
+import RiskChart from "./RiskChart";
 
 const API_URL = "https://focus-api-vg34.onrender.com";
 const API_KEY = "focus-dev-key-2026";
@@ -377,6 +378,20 @@ export default function App() {
             )}
           </Card>
         </div>
+
+
+        {/* Digital Twin Risk Timeline */}
+        {satellites.length > 0 && (
+          <Card style={{ marginBottom: 20, overflow: "hidden" }}>
+            <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <SectionTitle>Digital Twin — Risk Timeline 24h</SectionTitle>
+              <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--text-3)", letterSpacing: "0.08em" }}>SGP4 · SPACE-TRACK TLE</span>
+            </div>
+            <div style={{ height: 200, padding: "16px 8px 8px" }}>
+              <RiskChart noradId={satellites[0].norad_id} name={satellites[0].name} />
+            </div>
+          </Card>
+        )}
 
         {/* Footer */}
         <div style={{ paddingTop: 20, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
