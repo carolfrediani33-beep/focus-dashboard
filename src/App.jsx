@@ -99,6 +99,7 @@ function SectionTitle({ children }) {
 export default function App() {
   const [decisions, setDecisions] = useState([]);
   const [satellites, setSatellites] = useState([]);
+  const [tleData, setTleData] = useState({});
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cdm, setCdm] = useState(DEFAULT_CDM);
@@ -115,6 +116,14 @@ export default function App() {
       ]);
       setDecisions(d.data);
       setSatellites(s.data);
+      const tles = {};
+      await Promise.all(s.data.map(async sat => {
+        try {
+          const t = await axios.get(API_URL + "/v1/tle/" + sat.norad_id, { headers: H });
+          tles[sat.norad_id] = t.data;
+        } catch {}
+      }));
+      setTleData(tles);
       setHealth(h.data);
     } catch {
       setHealth(null);
@@ -217,7 +226,7 @@ export default function App() {
             </span>
           </div>
           <div style={{ height: 320 }}>
-            <OrbitalView satellites={satellites} />
+            <OrbitalView satellites={satellites} tleData={tleData} />
           </div>
         </Card>
 
