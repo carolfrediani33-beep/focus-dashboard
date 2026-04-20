@@ -102,9 +102,17 @@ export default function OrbitalView({ satellites, tleData = {} }) {
       const inc = ((tle ? tle.inclination_deg : null) || sat.inclination_deg || 51.6) * Math.PI / 180;
       const col = COLORS[i % COLORS.length];
 
+      const raan = (i / toRender.length) * Math.PI * 2;
       const ops = [];
       for (let a = 0; a <= Math.PI * 2 + 0.01; a += 0.02) {
-        ops.push(new THREE.Vector3(alt*Math.cos(a), alt*Math.sin(a)*Math.sin(inc), alt*Math.sin(a)*Math.cos(inc)));
+        const x = alt * Math.cos(a);
+        const y = alt * Math.sin(a) * Math.sin(inc);
+        const z = alt * Math.sin(a) * Math.cos(inc);
+        ops.push(new THREE.Vector3(
+          x * Math.cos(raan) - z * Math.sin(raan),
+          y,
+          x * Math.sin(raan) + z * Math.cos(raan)
+        ));
       }
       group.add(new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(ops),
@@ -117,7 +125,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
           new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 1 })
         );
         group.add(mesh);
-        satObjs.push({ mesh, alt, inc, phase: (i / toRender.length) * Math.PI * 2 });
+        satObjs.push({ mesh, alt, inc, raan, phase: 0 });
 
         // Trajectoire prédite depuis /v1/predict
         axios.get(API_URL + "/v1/predict/" + sat.norad_id + "?hours=6", { headers: H })
@@ -159,9 +167,16 @@ export default function OrbitalView({ satellites, tleData = {} }) {
       if (!dragging) { rotY += vy; vy *= 0.99; if (Math.abs(vy) < 0.0008) vy = 0.0008; }
       group.rotation.x = rotX;
       group.rotation.y = rotY;
-      satObjs.forEach(({ mesh, alt, inc, phase }) => {
+      satObjs.forEach(({ mesh, alt, inc, raan, phase }) => {
         const a = t * 0.22 + phase;
-        mesh.position.set(alt*Math.cos(a), alt*Math.sin(a)*Math.sin(inc), alt*Math.sin(a)*Math.cos(inc));
+        const x = alt * Math.cos(a);
+        const y = alt * Math.sin(a) * Math.sin(inc);
+        const z = alt * Math.sin(a) * Math.cos(inc);
+        mesh.position.set(
+          x * Math.cos(raan) - z * Math.sin(raan),
+          y,
+          x * Math.sin(raan) + z * Math.cos(raan)
+        );
       });
       renderer.render(scene, camera);
     };
