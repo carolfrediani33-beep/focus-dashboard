@@ -46,15 +46,13 @@ function Badge({ decision }) {
   );
 }
 
-function Card({ children, style = {}, glow }) {
+function Card({ children, style = {} }) {
   return (
     <div style={{
       background: "var(--bg-card)",
       border: "1px solid var(--border)",
       borderRadius: "var(--radius)",
-      boxShadow: glow
-        ? "0 0 0 1px " + glow + ", 0 4px 24px rgba(0,0,0,0.4)"
-        : "0 4px 24px rgba(0,0,0,0.3)",
+      boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
       ...style,
     }}>
       {children}
@@ -154,7 +152,7 @@ export default function App() {
   const resultStyle = result && !result.error ? DECISION_STYLE[result.decision] : null;
 
   return (
-    <div style={{ minHeight: "100vh", padding: "0 0 64px" }}>
+    <div style={{ minHeight: "100vh", paddingBottom: 64 }}>
 
       {/* Top bar */}
       <div style={{
@@ -166,14 +164,9 @@ export default function App() {
         position: "sticky", top: 0, zIndex: 100,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <div>
-            <span style={{
-              fontFamily: "var(--mono)", fontSize: 14, fontWeight: 500,
-              color: "var(--blue-light)", letterSpacing: "0.2em",
-            }}>
-              FOCUS
-            </span>
-          </div>
+          <span style={{ fontFamily: "var(--mono)", fontSize: 14, fontWeight: 500, color: "var(--blue-light)", letterSpacing: "0.2em" }}>
+            FOCUS
+          </span>
           <div style={{ width: 1, height: 20, background: "var(--border)" }} />
           <span style={{ fontSize: 11, color: "var(--text-2)", letterSpacing: "0.04em" }}>
             Space Collision Avoidance · Hybrid AND Engine
@@ -194,11 +187,7 @@ export default function App() {
               background: health ? "var(--green)" : "var(--red)",
               animation: health ? "pulse-dot 2.5s infinite" : "none",
             }} />
-            <span style={{
-              fontFamily: "var(--mono)", fontSize: 10, fontWeight: 500,
-              color: health ? "var(--green)" : "var(--red)",
-              letterSpacing: "0.08em",
-            }}>
+            <span style={{ fontFamily: "var(--mono)", fontSize: 10, fontWeight: 500, color: health ? "var(--green)" : "var(--red)", letterSpacing: "0.08em" }}>
               {health ? "NOMINAL" : "OFFLINE"}
             </span>
           </div>
@@ -208,22 +197,34 @@ export default function App() {
       <div style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 32px 0" }}>
 
         {/* KPIs */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
           <KpiCard label="Satellites Tracked" value={satellites.length} color="var(--blue-light)" />
           <KpiCard label="Total Decisions" value={decisions.length} color="var(--purple)" />
-          <KpiCard
-            label="Maneuvers Required"
-            value={maneuvers}
-            color="var(--red)"
-            sub={decisions.length ? ((maneuvers / decisions.length) * 100).toFixed(0) + "% of decisions" : ""}
-          />
+          <KpiCard label="Maneuvers Required" value={maneuvers} color="var(--red)"
+            sub={decisions.length ? ((maneuvers / decisions.length) * 100).toFixed(0) + "% of decisions" : ""} />
           <KpiCard label="Avg Confidence" value={avgConf} unit="%" color="var(--green)" />
         </div>
+
+        {/* Orbital View */}
+        <Card style={{ marginBottom: 24, overflow: "hidden" }}>
+          <div style={{
+            padding: "14px 24px", borderBottom: "1px solid var(--border)",
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+          }}>
+            <SectionTitle>Orbital View</SectionTitle>
+            <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--text-3)", letterSpacing: "0.08em" }}>
+              DRAG TO ROTATE · REAL-TIME SIMULATION
+            </span>
+          </div>
+          <div style={{ height: 320 }}>
+            <OrbitalView satellites={satellites} />
+          </div>
+        </Card>
 
         {/* Main grid */}
         <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 20, marginBottom: 20 }}>
 
-          {/* Left — CDM form */}
+          {/* Left */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <Card style={{ padding: 24 }}>
               <SectionTitle>CDM Analysis</SectionTitle>
@@ -243,18 +244,13 @@ export default function App() {
                   </div>
                 ))}
               </div>
-
               <button
-                onClick={submit}
-                disabled={busy}
+                onClick={submit} disabled={busy}
                 style={{
-                  width: "100%", padding: "11px 0",
-                  background: busy
-                    ? "var(--bg-2)"
-                    : "linear-gradient(135deg, var(--blue) 0%, #2563eb 100%)",
+                  width: "100%", padding: "11px 0", borderRadius: 6,
+                  background: busy ? "var(--bg-2)" : "linear-gradient(135deg, var(--blue) 0%, #2563eb 100%)",
                   color: busy ? "var(--text-3)" : "#fff",
                   fontSize: 11, letterSpacing: "0.1em", fontWeight: 500,
-                  borderRadius: 6,
                   boxShadow: busy ? "none" : "0 4px 16px rgba(59,130,246,0.3)",
                 }}
               >
@@ -280,11 +276,7 @@ export default function App() {
                       </div>
                       <p style={{ fontSize: 11, color: "var(--text-2)", lineHeight: 1.65 }}>{result.reasoning}</p>
                       {result.recommended_dv_ms && (
-                        <div style={{
-                          marginTop: 10, paddingTop: 10,
-                          borderTop: "1px solid var(--border)",
-                          fontFamily: "var(--mono)", fontSize: 11, color: "var(--blue-light)",
-                        }}>
+                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)", fontFamily: "var(--mono)", fontSize: 11, color: "var(--blue-light)" }}>
                           DV recommended: {result.recommended_dv_ms} m/s
                         </div>
                       )}
@@ -294,7 +286,6 @@ export default function App() {
               )}
             </Card>
 
-            {/* Satellites */}
             <Card style={{ padding: 24 }}>
               <SectionTitle>Tracked Objects</SectionTitle>
               {satellites.length === 0 ? (
@@ -321,8 +312,7 @@ export default function App() {
           {/* Right — Decision log */}
           <Card style={{ overflow: "hidden" }}>
             <div style={{
-              padding: "16px 24px",
-              borderBottom: "1px solid var(--border)",
+              padding: "16px 24px", borderBottom: "1px solid var(--border)",
               display: "flex", alignItems: "center", justifyContent: "space-between",
             }}>
               <SectionTitle>Decision Log</SectionTitle>
@@ -330,11 +320,8 @@ export default function App() {
                 {decisions.length} entries · auto-refresh 15s
               </span>
             </div>
-
             {loading ? (
-              <div style={{ padding: 32, fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-3)" }}>
-                Loading...
-              </div>
+              <div style={{ padding: 32, fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-3)" }}>Loading...</div>
             ) : decisions.length === 0 ? (
               <div style={{ padding: 32, fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-3)" }}>
                 No decisions recorded — run your first analysis
@@ -344,12 +331,11 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                      {["ID", "Primary", "Secondary", "Pc", "Distance", "TCA", "Decision", "Conf.", "DV", "Timestamp"].map(h => (
+                      {["ID","Primary","Secondary","Pc","Distance","TCA","Decision","Conf.","DV","Timestamp"].map(h => (
                         <th key={h} style={{
                           padding: "9px 16px", textAlign: "left",
-                          fontSize: 9, color: "var(--text-3)",
-                          letterSpacing: "0.1em", fontWeight: 600,
-                          textTransform: "uppercase", whiteSpace: "nowrap",
+                          fontSize: 9, color: "var(--text-3)", letterSpacing: "0.1em",
+                          fontWeight: 600, textTransform: "uppercase", whiteSpace: "nowrap",
                           background: "var(--bg-1)",
                         }}>{h}</th>
                       ))}
@@ -358,29 +344,19 @@ export default function App() {
                   <tbody>
                     {decisions.map((d, i) => (
                       <tr key={d.id}
-                        style={{
-                          borderBottom: "1px solid var(--border)",
-                          background: i % 2 ? "var(--bg-card)" : "transparent",
-                          transition: "background 0.1s",
-                        }}
+                        style={{ borderBottom: "1px solid var(--border)", background: i % 2 ? "var(--bg-card)" : "transparent", transition: "background 0.1s" }}
                         onMouseEnter={e => e.currentTarget.style.background = "var(--bg-2)"}
                         onMouseLeave={e => e.currentTarget.style.background = i % 2 ? "var(--bg-card)" : "transparent"}
                       >
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-3)" }}>{d.id}</td>
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--blue-light)" }}>{d.norad_id_primary}</td>
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-2)" }}>{d.norad_id_secondary}</td>
-                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: d.pc > 1e-4 ? "var(--red)" : "var(--green)" }}>
-                          {d.pc.toExponential(2)}
-                        </td>
+                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: d.pc > 1e-4 ? "var(--red)" : "var(--green)" }}>{d.pc.toExponential(2)}</td>
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-2)" }}>{d.miss_distance_m} m</td>
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-2)" }}>{d.tca_hours} h</td>
                         <td style={{ padding: "10px 16px" }}><Badge decision={d.decision} /></td>
-                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--purple)" }}>
-                          {(d.confidence * 100).toFixed(0)}%
-                        </td>
-                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--blue-light)" }}>
-                          {d.recommended_dv_ms ? d.recommended_dv_ms + " m/s" : "—"}
-                        </td>
+                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--purple)" }}>{(d.confidence * 100).toFixed(0)}%</td>
+                        <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--blue-light)" }}>{d.recommended_dv_ms ? d.recommended_dv_ms + " m/s" : "—"}</td>
                         <td style={{ padding: "10px 16px", fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-3)", whiteSpace: "nowrap" }}>
                           {new Date(d.created_at).toISOString().slice(0, 19).replace("T", " ")}
                         </td>
@@ -394,10 +370,7 @@ export default function App() {
         </div>
 
         {/* Footer */}
-        <div style={{
-          paddingTop: 20, borderTop: "1px solid var(--border)",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-        }}>
+        <div style={{ paddingTop: 20, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--text-3)", letterSpacing: "0.08em" }}>
             FOCUS Space Technologies · ESA Kelvins Validated · 100% Recall · -38% False Alerts
           </span>
