@@ -28,14 +28,17 @@ export default function OrbitalView({ satellites, tleData = {} }) {
     const group = new THREE.Group();
     scene.add(group);
 
-    // Terre
-    group.add(new THREE.Mesh(
-      new THREE.SphereGeometry(R, 64, 64),
-      new THREE.MeshPhongMaterial({ color: 0x0a1628, emissive: 0x051020, specular: 0x1a3a5c, shininess: 40 })
-    ));
+    // Texture NASA
+    const loader = new THREE.TextureLoader();
+    const earthMat = new THREE.MeshPhongMaterial({ color: 0x0a1628, emissive: 0x051020, specular: 0x1a3a5c, shininess: 40 });
+    loader.load(
+      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+      (tex) => { earthMat.map = tex; earthMat.needsUpdate = true; }
+    );
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(R, 64, 64), earthMat));
 
     // Grille
-    const gMat = new THREE.LineBasicMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.35 });
+    const gMat = new THREE.LineBasicMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.25 });
     for (let lat = -80; lat <= 80; lat += 20) {
       const pts = [];
       for (let lon = 0; lon <= 361; lon += 5) {
@@ -79,7 +82,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
     sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
     scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0x88aacc, size: 0.04, transparent: true, opacity: 0.5 })));
 
-    // Satellites
+    // Satellites — dans le group pour suivre la rotation
     const COLORS = [0x3b82f6, 0x34d399, 0xa78bfa, 0xf87171, 0xfbbf24];
     const satObjs = [];
     const toRender = satellites.length > 0 ? satellites : [{ altitude_km: 420, inclination_deg: 51.6 }];
@@ -101,7 +104,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
           new THREE.SphereGeometry(0.028, 12, 12),
           new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 1 })
         );
-        scene.add(mesh);
+        group.add(mesh);
         satObjs.push({ mesh, alt, inc, phase: (i / toRender.length) * Math.PI * 2 });
       }
     });
