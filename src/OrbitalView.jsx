@@ -125,7 +125,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
           new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 1 })
         );
         group.add(mesh);
-        satObjs.push({ mesh, alt, inc, raan, phase: 0 });
+        satObjs.push({ mesh, alt, inc, raan, phase: (i / toRender.length) * Math.PI * 2 });
 
         // Trajectoire prédite depuis /v1/predict
         axios.get(API_URL + "/v1/predict/" + sat.norad_id + "?hours=6", { headers: H })
