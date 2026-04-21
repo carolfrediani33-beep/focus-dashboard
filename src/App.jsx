@@ -117,14 +117,7 @@ export default function App() {
       ]);
       setDecisions(d.data);
       setSatellites(s.data);
-      const tles = {};
-      await Promise.all(s.data.map(async sat => {
-        try {
-          const t = await axios.get(API_URL + "/v1/tle/" + sat.norad_id, { headers: H });
-          tles[sat.norad_id] = t.data;
-        } catch {}
-      }));
-      setTleData(tles);
+
       setHealth(h.data);
     } catch {
       setHealth(null);
@@ -138,6 +131,24 @@ export default function App() {
     pull();
     const t = setInterval(pull, 15000);
     return () => clearInterval(t);
+  }, []);
+
+  // Fetch TLE une seule fois au démarrage
+  useEffect(() => {
+    const fetchTles = async () => {
+      try {
+        const s = await axios.get(API_URL + "/v1/satellites", { headers: H });
+        const tles = {};
+        await Promise.all(s.data.map(async sat => {
+          try {
+            const t = await axios.get(API_URL + "/v1/tle/" + sat.norad_id, { headers: H });
+            tles[sat.norad_id] = t.data;
+          } catch {}
+        }));
+        setTleData(tles);
+      } catch {}
+    };
+    fetchTles();
   }, []);
 
   const submit = async () => {
