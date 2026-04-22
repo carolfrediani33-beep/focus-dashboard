@@ -67,8 +67,17 @@ export default function MLPredictionPanel({ apiUrl, headers }) {
   const fetchPrediction = useCallback(async (scenario) => {
     setLoading(true); setError(null);
     try {
-      const r = await axios.post(`${apiUrl}/v1/predict-ml`, SCENARIOS[scenario], { headers });
-      setPrediction(r.data);
+      // Fetcher les indices Space Weather temps réel
+      let sw = { F10: 100.0, F3M: 100.0, SSN: 50.0, AP: 10.0 };
+      try {
+        const swRes = await axios.get(`${apiUrl}/v1/space-weather`, { headers });
+        sw = { F10: swRes.data.f10, F3M: swRes.data.f3m, SSN: swRes.data.ssn, AP: swRes.data.ap };
+      } catch {}
+
+      // Injecter les vrais indices dans chaque CDM
+      const cdms = SCENARIOS[scenario].map(cdm => ({ ...cdm, ...sw }));
+      const r = await axios.post(`${apiUrl}/v1/predict-ml`, cdms, { headers });
+      setPrediction({ ...r.data, space_weather: sw });
     } catch (e) {
       setError(e.response?.status === 404 ? "pending" : "error");
     } finally {
@@ -126,6 +135,22 @@ export default function MLPredictionPanel({ apiUrl, headers }) {
         }}>
           {loading ? "COMPUTING..." : "RUN ML PREDICTION"}
         </button>
+
+        {prediction?.space_weather && (
+          <div style={{ marginBottom: 12, padding: "8px 12px", borderRadius: 6, background: "var(--bg-1)", border: "1px solid var(--border)", display: "flex", gap: 20 }}>
+            <span style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--text-3)", letterSpacing: "0.1em" }}>SPACE WEATHER · NOAA LIVE</span>
+            {[
+              { label: "F10.7", value: prediction.space_weather.F10?.toFixed(1) },
+              { label: "F3M", value: prediction.space_weather.F3M?.toFixed(1) },
+              { label: "Kp", value: prediction.space_weather.AP?.toFixed(1) },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--text-3)" }}>{label}</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--blue-light)", fontWeight: 600 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {error === "error" && (
           <div style={{ padding: 16, fontFamily: "var(--mono)", fontSize: 11, color: "var(--red)", background: "var(--red)08", borderRadius: 8, border: "1px solid var(--red)25" }}>
