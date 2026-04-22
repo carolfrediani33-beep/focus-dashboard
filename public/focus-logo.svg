@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Cercle blanc -->
+  <circle cx="100" cy="90" r="85" fill="white"/>
+  
+  <!-- Orbites elliptiques -->
+  <ellipse cx="100" cy="85" rx="65" ry="28" fill="none" stroke="#800080" stroke-width="2.5" transform="rotate(-35 100 85)"/>
+  <ellipse cx="100" cy="85" rx="65" ry="28" fill="none" stroke="#800080" stroke-width="2.5" transform="rotate(35 100 85)"/>
+  
+  <!-- Étoile à 4 branches -->
+  <path d="M100 35 L106 80 L100 87 L94 80 Z" fill="#540869"/>
+  <path d="M100 135 L106 90 L100 87 L94 90 Z" fill="#800080"/>
+  <path d="M55 85 L94 80 L100 87 L94 90 Z" fill="#540869"/>
+  <path d="M145 85 L106 80 L100 87 L106 90 Z" fill="#800080"/>
+  
+  <!-- Centre -->
+  <circle cx="100" cy="87" r="5" fill="#340641"/>
+  
+  <!-- Texte FOCUS -->
+  <text x="100" y="158" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="28" fill="#0a0a0a" letter-spacing="3">FOCUS</text>
+</svg>
