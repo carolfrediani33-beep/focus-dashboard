@@ -111,10 +111,8 @@ export default function App() {
 
   // Check ML engine
   useEffect(() => {
-    import('axios').then(({default: axios}) => 
-      axios.get('https://focus-api-vg34.onrender.com/v1/health')
-        .then(() => setMlReady(true)).catch(() => {})
-    );
+    axios.get(API_URL + '/v1/health')
+      .then(() => setMlReady(true)).catch(() => {});
   }, []);
 
   useEffect(() => {
