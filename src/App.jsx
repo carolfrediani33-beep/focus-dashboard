@@ -109,6 +109,14 @@ export default function App() {
     fetchTles();
   }, []);
 
+  // Check ML engine
+  useEffect(() => {
+    import('axios').then(({default: axios}) => 
+      axios.get('https://focus-api-vg34.onrender.com/v1/health')
+        .then(() => setMlReady(true)).catch(() => {})
+    );
+  }, []);
+
   useEffect(() => {
     if (satellites.length === 0) return;
     axios.get(API_URL + "/v1/predict-ml/" + satellites[0]?.norad_id, { headers: H })
