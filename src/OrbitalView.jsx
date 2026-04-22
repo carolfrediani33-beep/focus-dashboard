@@ -44,7 +44,7 @@ export default function OrbitalView({ satellites, tleData = {} }) {
 
     // Terre
     const loader = new THREE.TextureLoader();
-    const earthMat = new THREE.MeshPhongMaterial({ color: 0x0a1628, emissive: 0x051020, specular: 0x1a3a5c, shininess: 40 });
+    const earthMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x333333, shininess: 15 });
     loader.load("/earth.jpg",
       (tex) => { earthMat.map = tex; earthMat.needsUpdate = true; }
     );
@@ -76,8 +76,8 @@ export default function OrbitalView({ satellites, tleData = {} }) {
       new THREE.MeshPhongMaterial({ color: 0x1a4a8a, transparent: true, opacity: 0.06, side: THREE.BackSide })
     ));
 
-    scene.add(new THREE.AmbientLight(0x223355, 2));
-    const sun = new THREE.DirectionalLight(0x4488cc, 2.5);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.0);
     sun.position.set(5, 3, 5);
     scene.add(sun);
 
