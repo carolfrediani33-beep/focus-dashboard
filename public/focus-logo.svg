@@ -1,20 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- Cercle blanc -->
-  <circle cx="100" cy="90" r="85" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220">
+  <!-- Étoile 4 branches -->
+  <path d="M100 10 L112 88 L100 100 L88 88 Z" fill="#340641"/>
+  <path d="M100 190 L112 112 L100 100 L88 112 Z" fill="#800080"/>
+  <path d="M10 100 L88 112 L100 100 L88 88 Z" fill="#340641"/>
+  <path d="M190 100 L112 112 L100 100 L112 88 Z" fill="#800080"/>
   
   <!-- Orbites elliptiques -->
-  <ellipse cx="100" cy="85" rx="65" ry="28" fill="none" stroke="#800080" stroke-width="2.5" transform="rotate(-35 100 85)"/>
-  <ellipse cx="100" cy="85" rx="65" ry="28" fill="none" stroke="#800080" stroke-width="2.5" transform="rotate(35 100 85)"/>
-  
-  <!-- Étoile à 4 branches -->
-  <path d="M100 35 L106 80 L100 87 L94 80 Z" fill="#540869"/>
-  <path d="M100 135 L106 90 L100 87 L94 90 Z" fill="#800080"/>
-  <path d="M55 85 L94 80 L100 87 L94 90 Z" fill="#540869"/>
-  <path d="M145 85 L106 80 L100 87 L106 90 Z" fill="#800080"/>
-  
-  <!-- Centre -->
-  <circle cx="100" cy="87" r="5" fill="#340641"/>
+  <ellipse cx="100" cy="100" rx="85" ry="36" fill="none" stroke="#800080" stroke-width="3" transform="rotate(-35 100 100)"/>
+  <ellipse cx="100" cy="100" rx="85" ry="36" fill="none" stroke="#800080" stroke-width="3" transform="rotate(35 100 100)"/>
   
   <!-- Texte FOCUS -->
-  <text x="100" y="158" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="28" fill="#0a0a0a" letter-spacing="3">FOCUS</text>
+  <text x="100" y="215" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="0" fill="#0a0a0a">FOCUS</text>
 </svg>
